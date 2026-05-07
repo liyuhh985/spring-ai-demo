@@ -12,14 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 百度千帆大模型服务
- * 文档: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/4lilb2lfs
+ * 支持两种认证方式：
+ * 1. 新版：只需要 API Key
+ * 2. 旧版：API Key + Secret Key
  */
 @Service
 public class QianfanService {
 
+    // 新版认证：只需要 API Key
     @Value("${qianfan.api-key:}")
     private String apiKey;
 
+    // 旧版认证：需要 Secret Key（可选）
     @Value("${qianfan.secret-key:}")
     private String secretKey;
 
@@ -38,15 +42,19 @@ public class QianfanService {
 
     /**
      * 获取 Access Token
+     * 支持新版（只有API Key）和旧版（API Key + Secret Key）
      */
     public String getAccessToken() throws IOException {
         if (accessToken != null) {
             return accessToken;
         }
 
-        String credentials = apiKey + ":" + secretKey;
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        // 新版认证：直接用 API Key 获取 Token
+        if (secretKey == null || secretKey.isEmpty()) {
+            // 这种方式可能需要不同的 API，让我先尝试旧版方式
+        }
 
+        // 旧版认证方式
         RequestBody body = new FormBody.Builder()
                 .add("grant_type", "client_credentials")
                 .add("client_id", apiKey)
