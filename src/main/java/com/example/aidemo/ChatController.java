@@ -33,13 +33,14 @@ public class ChatController {
             // 情况1：问销售排名（最好、top、销量等）
             if (lowerMessage.contains("销售") || lowerMessage.contains("top") || 
                 lowerMessage.contains("最好") || lowerMessage.contains("销量") ||
-                lowerMessage.contains("哪个")) {
+                lowerMessage.contains("哪个") || lowerMessage.contains("畅销")) {
                 var products = databaseService.getProductsBySales();
                 dataContext = "按销售额排序的商品数据：" + products;
             } 
-            // 情况2：问价格（价格最高、最贵等）
+            // 情况2：问价格（价格最高、单&#9;&#9;&#9;&#9;价最高、最贵等）
             else if (lowerMessage.contains("价格") || lowerMessage.contains("贵") || 
-                     lowerMessage.contains("便宜") || lowerMessage.contains("多少钱")) {
+                     lowerMessage.contains("便宜") || lowerMessage.contains("多少钱") ||
+                     lowerMessage.contains("售价") || lowerMessage.contains("单价")) {
                 var products = databaseService.getProductsByPriceDesc();
                 dataContext = "按价格排序的商品数据：" + products;
             }
