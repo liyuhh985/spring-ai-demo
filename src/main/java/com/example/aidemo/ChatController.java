@@ -2,10 +2,7 @@ package com.example.aidemo;
 
 import com.example.aidemo.service.DatabaseService;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/ai")
@@ -29,7 +26,6 @@ public class ChatController {
             回答时要用真实数据，并给出简单的分析建议。
             """;
 
-    @Autowired
     public ChatController(ChatClient.Builder chatClientBuilder, DatabaseService databaseService) {
         this.chatClient = chatClientBuilder.build();
         this.databaseService = databaseService;
