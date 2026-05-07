@@ -15,14 +15,12 @@
     <artifactId>spring-ai-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-ai-demo</name>
-    <description>Spring AI Demo with Baidu Qianfan</description>
+    <description>Spring AI Demo with DeepSeek</description>
     
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
     </properties>
     
-    <!-- 添加 Spring Milestones 仓库 -->
     <repositories>
         <repository>
             <id>spring-milestones</id>
@@ -40,18 +38,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         
-        <!-- Spring AI -->
+        <!-- Spring AI OpenAI (兼容 DeepSeek) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-core</artifactId>
-            <version>${spring-ai.version}</version>
-        </dependency>
-        
-        <!-- Spring AI ChatClient -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-spring-boot-starter</artifactId>
-            <version>${spring-ai.version}</version>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>1.0.0-M2</version>
         </dependency>
         
         <!-- OkHttp -->
@@ -59,12 +50,6 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
-        </dependency>
-        
-        <!-- Jackson -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         
         <dependency>

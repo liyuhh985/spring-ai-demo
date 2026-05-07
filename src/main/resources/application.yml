@@ -1,5 +1,10 @@
 server:
   port: 8080
 
-deepseek:
-  api-key: ${DEEPSEEK_API_KEY:}
+spring:
+  ai:
+    openai:
+      chat:
+        options:
+          model: deepseek-chat
+      api-key: ${DEEPSEEK_API_KEY:}

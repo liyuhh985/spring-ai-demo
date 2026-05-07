@@ -1,24 +1,25 @@
 package com.example.aidemo;
 
-import com.example.aidemo.service.DeepSeekService;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ai")
 public class ChatController {
 
-    private final DeepSeekService deepSeekService;
+    private final ChatClient chatClient;
 
-    public ChatController(DeepSeekService deepSeekService) {
-        this.deepSeekService = deepSeekService;
+    @Autowired
+    public ChatController(ChatClient.Builder chatClientBuilder) {
+        this.chatClient = chatClientBuilder.build();
     }
 
     @GetMapping("/chat")
     public String chat(@RequestParam String message) {
-        try {
-            return deepSeekService.chat(message);
-        } catch (Exception e) {
-            return "错误: " + e.getMessage();
-        }
+        return chatClient.prompt()
+                .user(message)
+                .call()
+                .content();
     }
 }

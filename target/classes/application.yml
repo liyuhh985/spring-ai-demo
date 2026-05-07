@@ -1,6 +1,10 @@
 server:
   port: 8080
 
-qianfan:
-  api-key: ${QIANFAN_API_KEY:}
-  secret-key: ${QIANFAN_SECRET_KEY:}
+spring:
+  ai:
+    openai:
+      chat:
+        options:
+          model: deepseek-chat
+      api-key: ${DEEPSEEK_API_KEY:}
