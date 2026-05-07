@@ -1,5 +1,5 @@
 server:
   port: 8080
 
-qianfan:
-  api-key: bce-v3/ALTAKSP-tL1Fn60qkdzGh6Js1SfRx/9728cac7a0c3f6eb0f007dfc969943a99ab9f3df
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY:}
