@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,23 +40,21 @@ public class DatabaseService {
     }
 
     /**
+     * 按价格排序查询商品（从高到低）
+     */
+    public List<Product> getProductsByPriceDesc() {
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("price");
+        return productMapper.selectList(wrapper);
+    }
+
+    /**
      * 按分类查询商品
      */
     public List<Product> getProductsByCategory(String category) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         wrapper.eq("category", category);
         return productMapper.selectList(wrapper);
-    }
-
-    /**
-     * 执行自定义 SQL 查询
-     */
-    public List<Map<String, Object>> executeQuery(String sql) {
-        try {
-            return jdbcTemplate.queryForList(sql);
-        } catch (Exception e) {
-            throw new RuntimeException("SQL 执行失败: " + e.getMessage());
-        }
     }
 
     /**

@@ -15,15 +15,7 @@ public class ChatController {
     private static final String SYSTEM_PROMPT = """
             你是一个资深的电商数据分析师，擅长数据分析、用户增长和营销策略。
             你的回答要专业、简洁、有数据支撑。
-            
-            你可以调用以下工具来获取数据：
-            - getProductsBySales(): 获取按销售额排序的商品列表
-            - getAllProducts(): 获取所有商品
-            - getProductsByCategory(category): 按分类查询商品
-            - getSalesSummary(): 获取销售统计汇总
-            
-            当用户问销售相关问题时，必须先调用相关工具获取真实数据，再回答。
-            回答时要用真实数据，并给出简单的分析建议。
+            当用户问销售或价格相关问题时，必须先调用相关工具获取真实数据，再回答。
             """;
 
     public ChatController(ChatClient.Builder chatClientBuilder, DatabaseService databaseService) {
@@ -38,13 +30,27 @@ public class ChatController {
         String dataContext = "";
         
         try {
-            if (lowerMessage.contains("销售") || lowerMessage.contains("top") || lowerMessage.contains("最好")) {
+            // 情况1：问销售排名（最好、top、销量等）
+            if (lowerMessage.contains("销售") || lowerMessage.contains("top") || 
+                lowerMessage.contains("最好") || lowerMessage.contains("销量") ||
+                lowerMessage.contains("哪个")) {
                 var products = databaseService.getProductsBySales();
                 dataContext = "按销售额排序的商品数据：" + products;
-            } else if (lowerMessage.contains("统计") || lowerMessage.contains("汇总")) {
+            } 
+            // 情况2：问价格（价格最高、最贵等）
+            else if (lowerMessage.contains("价格") || lowerMessage.contains("贵") || 
+                     lowerMessage.contains("便宜") || lowerMessage.contains("多少钱")) {
+                var products = databaseService.getProductsByPriceDesc();
+                dataContext = "按价格排序的商品数据：" + products;
+            }
+            // 情况3：问统计汇总
+            else if (lowerMessage.contains("统计") || lowerMessage.contains("汇总")) {
                 var summary = databaseService.getSalesSummary();
                 dataContext = "销售统计数据：" + summary;
-            } else if (lowerMessage.contains("电子") || lowerMessage.contains("服装") || lowerMessage.contains("家电")) {
+            }
+            // 情况4：按分类查询
+            else if (lowerMessage.contains("电子") || lowerMessage.contains("服装") || 
+                     lowerMessage.contains("家电")) {
                 String category = lowerMessage.contains("电子") ? "电子产品" : 
                                  lowerMessage.contains("服装") ? "服装" : "家电";
                 var products = databaseService.getProductsByCategory(category);
