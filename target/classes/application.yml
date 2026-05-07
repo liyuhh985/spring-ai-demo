@@ -7,5 +7,22 @@ spring:
       base-url: https://api.deepseek.com
       chat:
         options:
-          model: deepseek-chat
-      api-key: sk-528282f4bca94dbc98871e33d28a68c0
+          model: deepseek-v4-flash
+      api-key: ${DEEPSEEK_API_KEY}
+  
+  # H2 内存数据库配置
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true  # 启用 H2 控制台，方便查看
+  sql:
+    init:
+      mode: always  # 启动时执行 SQL 脚本
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
