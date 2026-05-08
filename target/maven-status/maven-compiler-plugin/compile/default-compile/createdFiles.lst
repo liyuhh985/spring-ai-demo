@@ -3,4 +3,6 @@ com/example/aidemo/service/DatabaseService.class
 com/example/aidemo/ChatController.class
 com/example/aidemo/service/QianfanService.class
 com/example/aidemo/SpringAiDemoApplication.class
+com/example/aidemo/utils/TextChunkUtil.class
+com/example/aidemo/utils/EmbeddingUtil.class
 com/example/aidemo/entity/Product.class
