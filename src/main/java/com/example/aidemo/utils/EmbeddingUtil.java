@@ -23,7 +23,8 @@ public class EmbeddingUtil {
 
     public float[] embed(String text) {
         try {
-            String jsonBody = String.format("{\"input\": \"%s\", \"model\": \"text-embedding-v2\"}", text.replace("\\", "\\\\").replace("\"", "\\\""));
+            // 阿里云百炼要求input是数组格式
+            String jsonBody = String.format("{\"input\": [\"%s\"], \"model\": \"text-embedding-v2\"}", text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", ""));
             RequestBody body = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
             Request request = new Request.Builder().url(BASE_URL).addHeader("Content-Type", "application/json").addHeader("Authorization", "Bearer " + apiKey).post(body).build();
             try (Response response = client.newCall(request).execute()) {
@@ -34,7 +35,17 @@ public class EmbeddingUtil {
     }
 
     private float[] parseEmbeddingResponse(String json) throws IOException {
+        // 打印响应以便调试
+        System.out.println("Embedding响应: " + json);
         JsonNode root = objectMapper.readTree(json);
+        
+        // 检查是否有错误
+        if (root.has("code")) {
+            String code = root.get("code").asText();
+            String message = root.has("message") ? root.get("message").asText() : "Unknown error";
+            throw new RuntimeException("API error: " + code + " - " + message);
+        }
+        
         JsonNode embedding = root.get("output").get("embeddings").get(0).get("embedding");
         List<Float> list = new ArrayList<>();
         for (JsonNode node : embedding) list.add((float) node.asDouble());
