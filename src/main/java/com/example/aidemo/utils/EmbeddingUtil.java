@@ -25,11 +25,16 @@ public class EmbeddingUtil {
         try {
             // 阿里云百炼要求input是数组格式
             String jsonBody = String.format("{\"input\": [\"%s\"], \"model\": \"text-embedding-v2\"}", text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", ""));
+            System.out.println("请求体: " + jsonBody);
             RequestBody body = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
             Request request = new Request.Builder().url(BASE_URL).addHeader("Content-Type", "application/json").addHeader("Authorization", "Bearer " + apiKey).post(body).build();
             try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) throw new RuntimeException("API failed: " + response);
-                return parseEmbeddingResponse(response.body().string());
+                String responseBody = response.body().string();
+                if (!response.isSuccessful()) {
+                    System.out.println("错误响应: " + responseBody);
+                    throw new RuntimeException("API failed: " + response + " body: " + responseBody);
+                }
+                return parseEmbeddingResponse(responseBody);
             }
         } catch (Exception e) { throw new RuntimeException("Embedding failed: " + e.getMessage(), e); }
     }
