@@ -24,14 +24,14 @@ public class EmbeddingTest {
      */
     @Test
     public void testEmbed() {
-        float[] vector = embeddingUtil.embed("你好");
+        List<Double> vector = embeddingUtil.embed("你好");
         
         System.out.println("=== Embedding 测试 ===");
-        System.out.println("向量长度: " + vector.length);
-        System.out.println("向量前5位: " + vector[0] + ", " + vector[1] + ", " + vector[2] + ", " + vector[3] + ", " + vector[4]);
+        System.out.println("向量长度: " + vector.size());
+        System.out.println("向量前5位: " + vector.get(0) + ", " + vector.get(1) + ", " + vector.get(2) + ", " + vector.get(3) + ", " + vector.get(4));
         
         // DeepSeek Embedding 是 1024 维
-        assertEquals(1024, vector.length, "向量长度应该是1024");
+        assertEquals(1024, vector.size(), "向量长度应该是1024");
     }
 
     /**
@@ -41,12 +41,12 @@ public class EmbeddingTest {
     public void testSimilarity() {
         System.out.println("=== 余弦相似度测试 ===");
         
-        float[] v1 = embeddingUtil.embed("苹果");
-        float[] v2 = embeddingUtil.embed("香蕉");
-        float[] v3 = embeddingUtil.embed("电脑");
+        List<Double> v1 = embeddingUtil.embed("苹果");
+        List<Double> v2 = embeddingUtil.embed("香蕉");
+        List<Double> v3 = embeddingUtil.embed("电脑");
         
-        float sim1 = embeddingUtil.cosineSimilarity(v1, v2);  // 苹果 vs 香蕉
-        float sim2 = embeddingUtil.cosineSimilarity(v1, v3);  // 苹果 vs 电脑
+        double sim1 = embeddingUtil.cosineSimilarity(v1, v2);  // 苹果 vs 香蕉
+        double sim2 = embeddingUtil.cosineSimilarity(v1, v3);  // 苹果 vs 电脑
         
         System.out.println("苹果 vs 香蕉 相似度: " + sim1);
         System.out.println("苹果 vs 电脑 相似度: " + sim2);
@@ -63,13 +63,13 @@ public class EmbeddingTest {
         System.out.println("=== 批量Embedding测试 ===");
         
         List<String> texts = List.of("Spring Boot", "Spring Cloud", "Python");
-        List<float[]> vectors = embeddingUtil.embed(texts);
+        List<List<Double>> vectors = embeddingUtil.embed(texts);
         
         System.out.println("批量处理数量: " + vectors.size());
         assertEquals(3, vectors.size());
         
         // 计算两两相似度
-        float sim = embeddingUtil.cosineSimilarity(vectors.get(0), vectors.get(1));
+        double sim = embeddingUtil.cosineSimilarity(vectors.get(0), vectors.get(1));
         System.out.println("Spring Boot vs Spring Cloud 相似度: " + sim);
     }
 
