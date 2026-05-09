@@ -1,3 +1,4 @@
+com/example/aidemo/utils/Test.class
 com/example/aidemo/mapper/ProductMapper.class
 com/example/aidemo/service/DatabaseService.class
 com/example/aidemo/ChatController.class
