@@ -7,7 +7,7 @@ spring:
       base-url: https://api.deepseek.com
       chat:
         options:
-          model: deepseek-chat
+          model: deepseek-v4-flash
       api-key: ${DEEPSEEK_API_KEY}
   
   # H2 内存数据库配置
