@@ -25,7 +25,7 @@ public class EmbeddingUtil {
     @Value("${dashscope.api.key:}")
     private String apiKey;
 
-    private final String BASE_URL = "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding";
+    private final String BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings";
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -35,6 +35,7 @@ public class EmbeddingUtil {
 
     public float[] embed(String text) {
         try {
+            // 使用 DashScope 的 OpenAI 兼容格式
             ObjectNode requestJson = objectMapper.createObjectNode();
             requestJson.put("model", "text-embedding-v2");
 
@@ -70,13 +71,8 @@ public class EmbeddingUtil {
         System.out.println("Embedding响应: " + json);
         JsonNode root = objectMapper.readTree(json);
 
-        if (root.has("code")) {
-            String code = root.get("code").asText();
-            String message = root.has("message") ? root.get("message").asText() : "Unknown error";
-            throw new RuntimeException("API error: " + code + " - " + message);
-        }
-
-        JsonNode embedding = root.get("output").get("embeddings").get(0).get("embedding");
+        // OpenAI 兼容格式解析：data[0].embedding
+        JsonNode embedding = root.get("data").get(0).get("embedding");
         List<Float> list = new ArrayList<>();
         for (JsonNode node : embedding) {
             list.add((float) node.asDouble());
