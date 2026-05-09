@@ -30,10 +30,18 @@ public class TextChunkUtil {
             int end = Math.min(start + chunkSize, text.length());
             chunks.add(text.substring(start, end));
 
+            // 如果已经处理到文本末尾，直接退出循环
+            if (end >= text.length()) {
+                break;
+            }
+
             // 下一次从 end - overlap 开始（确保有重叠）
-            start = end - overlap;
-            if (start < 0) start = 0;
-            if (start >= text.length()) break;
+            // 同时确保 start 必须比上一次大，防止无限循环
+            int nextStart = end - overlap;
+            if (nextStart <= start) {
+                nextStart = start + 1; // 强制向前推进，至少移动一个字符
+            }
+            start = nextStart;
         }
 
         return chunks;

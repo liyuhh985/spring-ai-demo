@@ -64,20 +64,21 @@ public class EmbeddingTest {
         
         String text = "这是第一段内容。\n\n这是第二段内容。\n\n这是第三段内容。";
         
-        // 按段落分块
+        // 1. 按段落分块
         List<String> chunks = textChunkUtil.chunkByParagraph(text);
-        System.out.println("分块数量: " + chunks.size());
-        chunks.forEach(chunk -> System.out.println("块: " + chunk));
-        
+        System.out.println("按段落分块数量: " + chunks.size());
         assertEquals(3, chunks.size());
         
-        // 按固定字数分块
-        String longText = "这是一段很长的文本，我们需要把它分成小块。" +
-                "每一块大约200字左右，这样可以更好地进行向量化处理。" +
-                "分块的好处是可以提高检索的精度，因为我们总是返回最相关的那个小块，而不是整篇长文档。";
+        // 2. 按固定字数分块 (测试死循环是否修复)
+        String longText = "这是一段很长的文本，我们需要把它分成小块。每块大约50字。";
+        List<String> sizeChunks = textChunkUtil.chunkBySize(longText, 10, 5);
         
-        List<String> sizeChunks = textChunkUtil.chunkBySize(longText, 50, 10);
-        System.out.println("\n固定字数分块数量: " + sizeChunks.size());
-        sizeChunks.forEach(chunk -> System.out.println("块(" + chunk.length() + "字): " + chunk));
+        System.out.println("按字数分块数量: " + sizeChunks.size());
+        assertTrue(sizeChunks.size() > 0);
+        
+        // 打印分块内容（不考虑乱码，仅验证逻辑）
+        for (int i = 0; i < sizeChunks.size(); i++) {
+            System.out.println("分块 " + i + ": " + sizeChunks.get(i));
+        }
     }
 }
