@@ -13,7 +13,7 @@ spring:
   # Redis 配置（使用 DB1，不影响其他项目）
   data:
     redis:
-      host: 127.0.0.1
+      host: 106.53.219.214
       port: 6379
       database: 1
   
