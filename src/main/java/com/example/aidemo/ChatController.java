@@ -91,13 +91,8 @@ public class ChatController {
         try {
             var products = databaseService.getAllProducts();
             for (var product : products) {
-<<<<<<< HEAD
-                String content = String.format("Product: %s, Price: %d, Category: %s, Sales: %d",
-                        product.getName(), product.getPrice(), 
-=======
                 String content = String.format("Product: %s, Price: %.2f, Category: %s, Sales: %d",
                         product.getName(), product.getPrice().doubleValue(), 
->>>>>>> 42305bdabf259d5b83121e07bf001985f52e7357
                         product.getCategory(), product.getSales());
                 vectorStoreService.saveDocument("product_" + product.getId(), content);
             }

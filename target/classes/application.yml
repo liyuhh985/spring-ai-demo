@@ -16,7 +16,7 @@ spring:
       host: 106.53.219.214
       port: 6379
       database: 1
-      password: ${REDIS_PASSWORD:Yuloveliyuu970109}
+      password: ${REDIS_PASSWORD:987654321yby}
   
   # H2 内存数据库配置
   datasource:
