@@ -5,6 +5,7 @@ import com.example.aidemo.service.VectorStoreService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -40,7 +41,9 @@ public class ChatController {
         // Step 1: RAG vector search
         String ragContext = "";
         try {
-            List<String> relevantDocs = vectorStoreService.search(message, 10);
+            // 先取 20 个候选，再用 LLM 重排序到 10 个
+            List<String> candidates = vectorStoreService.search(message, 20, 0.0f);
+            List<String> relevantDocs = rerankWithLLM(message, candidates, 10);
             if (relevantDocs != null && !relevantDocs.isEmpty()) {
                 ragContext = "【Knowledge Base】\n" + String.join("\n---\n", relevantDocs);
             }
@@ -135,5 +138,49 @@ public class ChatController {
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
+    }
+    
+    /**
+     * 用 LLM 对候选结果进行重排序
+     */
+    private List<String> rerankWithLLM(String query, List<String> candidates, int topK) {
+        if (candidates.isEmpty()) return candidates;
+        
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("请根据与用户问题的相关度，对以下文档进行排序。\n\n");
+        prompt.append("用户问题：").append(query).append("\n\n");
+        prompt.append("候选文档：\n");
+        for (int i = 0; i < candidates.size(); i++) {
+            prompt.append(i + 1).append(". ").append(candidates.get(i)).append("\n");
+        }
+        prompt.append("\n请输出前 ").append(topK).append(" 个最相关的文档编号，用逗号分隔（如：1,3,5）：");
+
+        String result = chatClient.prompt()
+                .system("你是一个文档相关性排序专家。")
+                .user(prompt.toString())
+                .call()
+                .content();
+
+        return parseRerankResult(result, candidates, topK);
+    }
+
+    private List<String> parseRerankResult(String llmResult, List<String> candidates, int topK) {
+        List<String> results = new ArrayList<>();
+        String[] parts = llmResult.replaceAll("[^0-9,，]", " ").split("\\s+");
+
+        for (String p : parts) {
+            try {
+                int idx = Integer.parseInt(p.replaceAll("[^0-9]", "")) - 1;
+                if (idx >= 0 && idx < candidates.size() && !results.contains(candidates.get(idx))) {
+                    results.add(candidates.get(idx));
+                }
+            } catch (Exception e) {}
+            if (results.size() >= topK) break;
+        }
+
+        if (results.isEmpty()) {
+            return candidates.subList(0, Math.min(topK, candidates.size()));
+        }
+        return results;
     }
 }
