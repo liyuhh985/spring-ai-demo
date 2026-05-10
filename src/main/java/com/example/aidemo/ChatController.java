@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -37,7 +38,7 @@ public class ChatController {
         this.chatClient = chatClientBuilder
                 .defaultFunction("getProductsByPriceAsc", 
                     "Get products sorted by price (ascending)",
-                    (FunctionInput input) -> {
+                    (Map<String, Object> input) -> {
                         var products = databaseService.getProductsByPriceDesc();
                         Collections.reverse(products);
                         try { 
@@ -48,7 +49,7 @@ public class ChatController {
                     })
                 .defaultFunction("getProductsBySales",
                     "Get products sorted by sales (descending)",
-                    (FunctionInput input) -> {
+                    (Map<String, Object> input) -> {
                         var products = databaseService.getProductsBySales();
                         try { 
                             return objectMapper.writeValueAsString(products); 
@@ -58,7 +59,7 @@ public class ChatController {
                     })
                 .defaultFunction("getSalesSummary", 
                     "Get sales statistics",
-                    (FunctionInput input) -> {
+                    (Map<String, Object> input) -> {
                         var summary = databaseService.getSalesSummary();
                         try { 
                             return objectMapper.writeValueAsString(summary); 
