@@ -1,4 +1,5 @@
 com/example/aidemo/utils/Test.class
+com/example/aidemo/FunctionInput.class
 com/example/aidemo/service/QianfanService.class
 com/example/aidemo/utils/TextChunkUtil.class
 com/example/aidemo/utils/EmbeddingUtil.class

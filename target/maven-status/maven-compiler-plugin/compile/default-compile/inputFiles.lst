@@ -4,6 +4,7 @@
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/mapper/ProductMapper.java
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/utils/TextChunkUtil.java
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/utils/Test.java
+/home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/FunctionInput.java
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/service/DatabaseTools.java
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/service/QianfanService.java
 /home/ubuntu/.openclaw/workspace/spring-ai-demo/src/main/java/com/example/aidemo/service/VectorStoreService.java

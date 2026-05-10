@@ -37,7 +37,7 @@ public class ChatController {
         this.chatClient = chatClientBuilder
                 .defaultFunction("getProductsByPriceAsc", 
                     "Get products sorted by price (ascending)",
-                    (String input) -> {
+                    (FunctionInput input) -> {
                         var products = databaseService.getProductsByPriceDesc();
                         Collections.reverse(products);
                         try { 
@@ -48,7 +48,7 @@ public class ChatController {
                     })
                 .defaultFunction("getProductsBySales",
                     "Get products sorted by sales (descending)",
-                    (String input) -> {
+                    (FunctionInput input) -> {
                         var products = databaseService.getProductsBySales();
                         try { 
                             return objectMapper.writeValueAsString(products); 
@@ -58,7 +58,7 @@ public class ChatController {
                     })
                 .defaultFunction("getSalesSummary", 
                     "Get sales statistics",
-                    (String input) -> {
+                    (FunctionInput input) -> {
                         var summary = databaseService.getSalesSummary();
                         try { 
                             return objectMapper.writeValueAsString(summary); 
