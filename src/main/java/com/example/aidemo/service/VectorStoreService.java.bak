@@ -39,17 +39,12 @@ public class VectorStoreService {
     }
 
     /**
-     * 向量检索（兼容旧版本，无阈值）
+     * 向量检索
+     * @param query 查询语句
+     * @param topK 返回前K个结果
+     * @return 匹配的文本列表
      */
     public List<String> search(String query, int topK) {
-        return search(query, topK, 0.0f);
-    }
-    
-    /**
-     * 向量检索（带阈值过滤）
-     * @param threshold 相似度阈值，低于此值的结果会被过滤掉
-     */
-    public List<String> search(String query, int topK, float threshold) {
         float[] queryVec = embeddingUtil.embed(query);
         Set<String> keys = redisTemplate.keys(VECTOR_PREFIX + "*");
         if (keys == null || keys.isEmpty()) return Collections.emptyList();
@@ -64,28 +59,12 @@ public class VectorStoreService {
             }
         }
         
+        // 按相似度降序排列
         scores.sort((a, b) -> Float.compare(b.getValue(), a.getValue()));
 
-        // Step 1: 过滤高于阈值的结果
-        List<Map.Entry<String, Float>> filteredScores = new ArrayList<>();
-        for (var entry : scores) {
-            if (entry.getValue() >= threshold) {
-                filteredScores.add(entry);
-            }
-        }
-        
-        // Step 2: 兜底逻辑 - 如果过滤后为空，返回原始 topK
-        List<Map.Entry<String, Float>> finalScores;
-        if (filteredScores.isEmpty()) {
-            finalScores = scores.subList(0, Math.min(topK, scores.size()));
-        } else {
-            finalScores = filteredScores.subList(0, Math.min(topK, filteredScores.size()));
-        }
-        
-        // Step 3: 提取内容
         List<String> results = new ArrayList<>();
-        for (int i = 0; i < finalScores.size(); i++) {
-            String content = redisTemplate.opsForValue().get(CONTENT_PREFIX + finalScores.get(i).getKey());
+        for (int i = 0; i < Math.min(topK, scores.size()); i++) {
+            String content = redisTemplate.opsForValue().get(CONTENT_PREFIX + scores.get(i).getKey());
             if (content != null) {
                 results.add(content);
             }
