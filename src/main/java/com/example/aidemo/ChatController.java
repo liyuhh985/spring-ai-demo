@@ -1,8 +1,11 @@
 package com.example.aidemo;
 
 import com.example.aidemo.service.DatabaseService;
+import com.example.aidemo.service.VectorStoreService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ai")
@@ -10,64 +13,92 @@ public class ChatController {
 
     private final ChatClient chatClient;
     private final DatabaseService databaseService;
+    private final VectorStoreService vectorStoreService;
 
-    // System Prompt：告诉 AI 它的角色和能力
     private static final String SYSTEM_PROMPT = """
             你是一个资深的电商数据分析师，擅长数据分析、用户增长和营销策略。
             你的回答要专业、简洁、有数据支撑。
             当用户问销售或价格相关问题时，必须先调用相关工具获取真实数据，再回答。
+            如果知识库中有相关文档，优先根据文档内容回答，不要编造数据。
             """;
 
-    public ChatController(ChatClient.Builder chatClientBuilder, DatabaseService databaseService) {
+    public ChatController(ChatClient.Builder chatClientBuilder, 
+                          DatabaseService databaseService,
+                          VectorStoreService vectorStoreService) {
         this.chatClient = chatClientBuilder.build();
         this.databaseService = databaseService;
+        this.vectorStoreService = vectorStoreService;
     }
 
     @GetMapping("/chat")
     public String chat(@RequestParam String message) {
-        // 根据用户问题，自动调用数据库
+        // Step 1: RAG vector search
+        String ragContext = "";
+        try {
+            List<String> relevantDocs = vectorStoreService.search(message, 3);
+            if (relevantDocs != null && !relevantDocs.isEmpty()) {
+                ragContext = "【Knowledge Base】\n" + String.join("\n---\n", relevantDocs);
+            }
+        } catch (Exception e) {
+            ragContext = "【RAG Failed】" + e.getMessage();
+        }
+        
+        // Step 2: Traditional database query
         String lowerMessage = message.toLowerCase();
         String dataContext = "";
         
         try {
-            // 情况1：问销售排名（最好、top、销量等）
-            if (lowerMessage.contains("销售") || lowerMessage.contains("top") || 
-                lowerMessage.contains("最好") || lowerMessage.contains("销量") ||
-                lowerMessage.contains("哪个") || lowerMessage.contains("畅销")) {
+            if (lowerMessage.contains("sales") || lowerMessage.contains("top") || 
+                lowerMessage.contains("best") || lowerMessage.contains("sold")) {
                 var products = databaseService.getProductsBySales();
-                dataContext = "按销售额排序的商品数据：" + products;
+                dataContext = "【Database】Sales ranking: " + products;
             } 
-            // 情况2：问价格（价格最高、单&#9;&#9;&#9;&#9;价最高、最贵等）
-            else if (lowerMessage.contains("价格") || lowerMessage.contains("贵") || 
-                     lowerMessage.contains("便宜") || lowerMessage.contains("多少钱") ||
-                     lowerMessage.contains("售价") || lowerMessage.contains("单价")) {
+            else if (lowerMessage.contains("price") || lowerMessage.contains("expensive") || 
+                     lowerMessage.contains("cheap") || lowerMessage.contains("cost")) {
                 var products = databaseService.getProductsByPriceDesc();
-                dataContext = "按价格排序的商品数据：" + products;
+                dataContext = "【Database】Price ranking: " + products;
             }
-            // 情况3：问统计汇总
-            else if (lowerMessage.contains("统计") || lowerMessage.contains("汇总")) {
+            else if (lowerMessage.contains("stat") || lowerMessage.contains("summary")) {
                 var summary = databaseService.getSalesSummary();
-                dataContext = "销售统计数据：" + summary;
-            }
-            // 情况4：按分类查询
-            else if (lowerMessage.contains("电子") || lowerMessage.contains("服装") || 
-                     lowerMessage.contains("家电")) {
-                String category = lowerMessage.contains("电子") ? "电子产品" : 
-                                 lowerMessage.contains("服装") ? "服装" : "家电";
-                var products = databaseService.getProductsByCategory(category);
-                dataContext = category + "分类的商品数据：" + products;
+                dataContext = "【Database】Statistics: " + summary;
             }
         } catch (Exception e) {
-            dataContext = "数据库查询失败: " + e.getMessage();
+            dataContext = "Database query failed: " + e.getMessage();
         }
         
-        // 构建完整的问题（包含数据库上下文）
-        String fullMessage = message + "\n\n参考数据：" + dataContext;
+        // Step 3: Build context
+        StringBuilder fullMessage = new StringBuilder();
+        fullMessage.append(message).append("\n\n");
         
+        if (!ragContext.isEmpty()) {
+            fullMessage.append(ragContext).append("\n\n");
+        }
+        
+        if (!dataContext.isEmpty()) {
+            fullMessage.append(dataContext);
+        }
+        
+        // Step 4: Call LLM
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
-                .user(fullMessage)
+                .user(fullMessage.toString())
                 .call()
                 .content();
+    }
+    
+    @GetMapping("/init-knowledge-base")
+    public String initKnowledgeBase() {
+        try {
+            var products = databaseService.getAllProducts();
+            for (var product : products) {
+                String content = String.format("Product: %s, Price: %.2f, Category: %s, Sales: %d",
+                        product.getName(), product.getPrice().doubleValue(), 
+                        product.getCategory(), product.getSales());
+                vectorStoreService.saveDocument("product_" + product.getId(), content);
+            }
+            return "Knowledge base initialized! " + products.size() + " products imported";
+        } catch (Exception e) {
+            return "Init failed: " + e.getMessage();
+        }
     }
 }
