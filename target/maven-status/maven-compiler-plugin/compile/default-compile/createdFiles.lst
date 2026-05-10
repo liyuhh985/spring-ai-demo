@@ -1,10 +1,11 @@
 com/example/aidemo/utils/Test.class
+com/example/aidemo/service/QianfanService.class
+com/example/aidemo/utils/TextChunkUtil.class
+com/example/aidemo/utils/EmbeddingUtil.class
 com/example/aidemo/mapper/ProductMapper.class
+com/example/aidemo/service/DatabaseTools.class
 com/example/aidemo/service/DatabaseService.class
 com/example/aidemo/ChatController.class
 com/example/aidemo/service/VectorStoreService.class
-com/example/aidemo/service/QianfanService.class
 com/example/aidemo/SpringAiDemoApplication.class
-com/example/aidemo/utils/TextChunkUtil.class
-com/example/aidemo/utils/EmbeddingUtil.class
 com/example/aidemo/entity/Product.class
