@@ -106,4 +106,34 @@ public class ChatController {
             return "Init failed: " + e.getMessage();
         }
     }
+    
+    /**
+     * 测试向量检索（带阈值过滤）
+     * @param query 搜索关键词
+     * @param topK 返回结果数量
+     * @param threshold 相似度阈值（0.0-1.0），低于此值的结果会被过滤
+     */
+    @GetMapping("/test-search")
+    public String testSearch(@RequestParam String query, 
+                            @RequestParam(defaultValue = "10") int topK,
+                            @RequestParam(defaultValue = "0.0") float threshold) {
+        try {
+            List<String> results = vectorStoreService.search(query, topK, threshold);
+            
+            StringBuilder response = new StringBuilder();
+            response.append("Query: ").append(query).append("\n");
+            response.append("Threshold: ").append(threshold).append("\n");
+            response.append("TopK: ").append(topK).append("\n\n");
+            
+            if (results.isEmpty()) {
+                response.append("No results found (or all results below threshold)");
+            } else {
+                response.append("Results: \n").append(String.join("\n---\n", results));
+            }
+            
+            return response.toString();
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
 }
