@@ -40,7 +40,7 @@ public class ChatController {
         // Step 1: RAG vector search
         String ragContext = "";
         try {
-            List<String> relevantDocs = vectorStoreService.search(message, 3);
+            List<String> relevantDocs = vectorStoreService.search(message, 10);
             if (relevantDocs != null && !relevantDocs.isEmpty()) {
                 ragContext = "【Knowledge Base】\n" + String.join("\n---\n", relevantDocs);
             }
