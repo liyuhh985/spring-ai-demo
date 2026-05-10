@@ -3,6 +3,7 @@ package com.example.aidemo;
 import com.example.aidemo.service.DatabaseService;
 import com.example.aidemo.service.VectorStoreService;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -96,6 +97,12 @@ public class ChatController {
     
     @GetMapping("/init-knowledge-base")
     public String initKnowledgeBase() {
+        initKnowledgeBaseAsync();
+        return "知识库更新已启动，请在后台等待完成...";
+    }
+
+    @Async
+    public void initKnowledgeBaseAsync() {
         try {
             var products = databaseService.getAllProducts();
             for (var product : products) {
@@ -104,9 +111,9 @@ public class ChatController {
                         product.getCategory(), product.getSales());
                 vectorStoreService.saveDocument("product_" + product.getId(), content);
             }
-            return "Knowledge base initialized! " + products.size() + " products imported";
+            System.out.println("Knowledge base initialized! " + products.size() + " products imported");
         } catch (Exception e) {
-            return "Init failed: " + e.getMessage();
+            System.out.println("Init failed: " + e.getMessage());
         }
     }
     
