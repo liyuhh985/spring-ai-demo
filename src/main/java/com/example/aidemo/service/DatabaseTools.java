@@ -67,32 +67,20 @@ public class DatabaseTools {
                 .withInputType(Void.class)
                 .build(),
 
-            // Tool 5: 导出产品到 Excel（返回 data URL）
+            // Tool 5: 导出产品到 Excel（返回简洁下载链接）
             FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 try {
-                    var products = databaseService.getAllProducts();
+                    // Excel 文件通过 /ai/export 端点直接下载
+                    String downloadUrl = "/ai/export";
+                    String message = "Excel 已生成！请直接访问 http://localhost:8080/ai/export 下载 Excel 文件";
                     
-                    // 在内存中生成 Excel
-                    java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
-                    
-                    EasyExcel.write(outputStream, Product.class)
-                        .sheet("产品列表")
-                        .doWrite(products);
-                    
-                    // 转换为 Base64
-                    byte[] excelBytes = outputStream.toByteArray();
-                    String base64 = java.util.Base64.getEncoder().encodeToString(excelBytes);
-                    
-                    // 返回 data URL 格式，用户可直接在浏览器打开下载
-                    String downloadUrl = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64;
-                    
-                    return Map.of("status", "success", "downloadUrl", downloadUrl, "filename", "products.xlsx");
+                    return Map.of("status", "success", "message", message, "downloadUrl", downloadUrl);
                 } catch (Exception e) {
                     return Map.of("status", "error", "message", "Excel导出失败: " + e.getMessage());
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件（无参数）。返回 data URL 格式的 Excel 下载链接，AI 可以直接将 downloadUrl 提供给用户，用户在浏览器中打开该链接即可自动下载 Excel 文件。")
+                .withDescription("导出所有产品到 Excel 文件（无参数）。调用后会返回下载链接，请直接告诉用户访问 http://localhost:8080/ai/export 下载 Excel 文件即可。")
                 .withInputType(Void.class)
                 .build()
         );
