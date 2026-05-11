@@ -1,11 +1,11 @@
 package com.example.aidemo.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Database Tools - Spring AI 1.0.0-M4 Function Calling 实现
@@ -14,7 +14,6 @@ import java.util.List;
 public class DatabaseTools {
 
     private final DatabaseService databaseService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DatabaseTools(DatabaseService databaseService) {
         this.databaseService = databaseService;
@@ -26,53 +25,47 @@ public class DatabaseTools {
     public List<FunctionCallback> getTools() {
         return List.of(
             // Tool 1: 按价格升序查询（无需参数）
-            FunctionCallbackWrapper.<String, String>builder(ignored -> {
+            FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 var products = databaseService.getProductsByPriceDesc();
                 java.util.Collections.reverse(products);
-                return toJson(products);
+                return Map.of("status", "success", "data", products);
             })
                 .withName("getProductsByPriceAsc")
                 .withDescription("获取按价格升序的产品列表，最便宜的产品排在前面。用于回答最便宜、价格最低等相关问题。")
-                .withInputType(String.class)
+                .withInputType(Void.class)
                 .build(),
 
             // Tool 2: 按销量排序查询（无需参数）
-            FunctionCallbackWrapper.<String, String>builder(ignored -> {
+            FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 var products = databaseService.getProductsBySales();
-                return toJson(products);
+                return Map.of("status", "success", "data", products);
             })
                 .withName("getProductsBySales")
                 .withDescription("获取按销量排序的产品列表，销量最高的排在前面。用于回答销量最好、最受欢迎等相关问题。")
-                .withInputType(String.class)
+                .withInputType(Void.class)
                 .build(),
 
             // Tool 3: 按类别查询（需要类别参数）
-            FunctionCallbackWrapper.<String, String>builder(input -> {
-                var products = databaseService.getProductsByCategory(input);
-                return toJson(products);
+            FunctionCallbackWrapper.<CategoryRequest, Map<String, Object>>builder(request -> {
+                var products = databaseService.getProductsByCategory(request.category());
+                return Map.of("status", "success", "data", products);
             })
                 .withName("getProductsByCategory")
                 .withDescription("根据产品类别查询产品列表")
-                .withInputType(String.class)
+                .withInputType(CategoryRequest.class)
                 .build(),
 
             // Tool 4: 获取销售统计（无需参数）
-            FunctionCallbackWrapper.<String, String>builder(ignored -> {
+            FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 var summary = databaseService.getSalesSummary();
-                return toJson(summary);
+                return Map.of("status", "success", "data", summary);
             })
                 .withName("getSalesSummary")
                 .withDescription("获取销售统计数据，包括总销售额、总订单数、平均订单金额等")
-                .withInputType(String.class)
+                .withInputType(Void.class)
                 .build()
         );
     }
 
-    private String toJson(Object obj) {
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
-        }
-    }
+    public record CategoryRequest(String category) {}
 }
