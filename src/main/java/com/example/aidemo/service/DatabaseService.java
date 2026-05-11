@@ -49,6 +49,15 @@ public class DatabaseService {
     }
 
     /**
+     * 按价格升序查询商品（从低到高）
+     */
+    public List<Product> getProductsByPriceAsc() {
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        wrapper.orderByAsc("price");
+        return productMapper.selectList(wrapper);
+    }
+
+    /**
      * 按分类查询商品
      */
     public List<Product> getProductsByCategory(String category) {

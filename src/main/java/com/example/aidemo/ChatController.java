@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.example.aidemo.entity.Product;
 import com.example.aidemo.service.DatabaseService;
 import com.example.aidemo.service.DatabaseTools;
+import com.example.aidemo.service.DatabaseTools.ExportContext;
 import com.example.aidemo.service.VectorStoreService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.chat.client.ChatClient;
@@ -95,9 +96,48 @@ public class ChatController {
     }
 
     @GetMapping("/export")
-    public void exportExcel(HttpServletResponse response) {
+    public void exportExcel(
+            HttpServletResponse response,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false, defaultValue = "false") boolean exportData) {
         try {
-            List<Product> products = databaseService.getAllProducts();
+            List<Product> products;
+            
+            // 优先从 ExportContext 获取数据（通过 AI function callback 设置）
+            List<Product> contextProducts = ExportContext.getProducts();
+            if (contextProducts != null && !contextProducts.isEmpty()) {
+                products = contextProducts;
+                ExportContext.clear(); // 清理上下文
+            } else {
+                // 直接通过 URL 参数查询
+                if (category != null && !category.isEmpty()) {
+                    products = databaseService.getProductsByCategory(category);
+                } else {
+                    products = databaseService.getAllProducts();
+                }
+                
+                // 排序
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    products = switch (sortBy) {
+                        case "price-asc" -> databaseService.getProductsByPriceAsc();
+                        case "price-desc" -> databaseService.getProductsByPriceDesc();
+                        case "sales-asc" -> {
+                            var sorted = databaseService.getProductsBySales();
+                            java.util.Collections.reverse(sorted);
+                            yield sorted;
+                        }
+                        case "sales-desc" -> databaseService.getProductsBySales();
+                        default -> products;
+                    };
+                }
+                
+                // 限制数量
+                if (limit != null && limit > 0 && products.size() > limit) {
+                    products = products.subList(0, limit);
+                }
+            }
             
             // 添加日志确认查询成功
             System.out.println("Export: Found " + products.size() + " products");
