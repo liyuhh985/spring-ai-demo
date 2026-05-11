@@ -38,18 +38,15 @@ public class ChatController {
         this.chatClient = chatClientBuilder
                 .defaultFunction("getProductsByPriceAsc", 
                     "Get products sorted by price (ascending)",
-                    (Map<String, Object> input) -> {
+                    (Supplier<String>) () -> {
                         var products = databaseService.getProductsByPriceDesc();
                         Collections.reverse(products);
-                        try { 
-                            return objectMapper.writeValueAsString(products); 
-                        } catch (Exception e) { 
-                            return "Error: " + e.getMessage(); 
-                        }
+                        try { return objectMapper.writeValueAsString(products); } 
+                        catch (Exception e) { return "Error: " + e.getMessage(); }
                     })
                 .defaultFunction("getProductsBySales",
                     "Get products sorted by sales (descending)",
-                    (Map<String, Object> input) -> {
+                    (Supplier<String>) () -> {
                         var products = databaseService.getProductsBySales();
                         try { 
                             return objectMapper.writeValueAsString(products); 
@@ -59,7 +56,7 @@ public class ChatController {
                     })
                 .defaultFunction("getSalesSummary", 
                     "Get sales statistics",
-                    (Map<String, Object> input) -> {
+                    (Supplier<String>) () -> {
                         var summary = databaseService.getSalesSummary();
                         try { 
                             return objectMapper.writeValueAsString(summary); 
