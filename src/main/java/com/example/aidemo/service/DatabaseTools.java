@@ -7,6 +7,9 @@ import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -96,5 +99,5 @@ public class DatabaseTools {
 
     public record CategoryRequest(String category) {}
 
-    public record ExportExcelRequest(String path, String fileName) {}
+    public record ExportExcelRequest(@JsonProperty("path") String path, @JsonProperty("fileName") String fileName) {}
 }
