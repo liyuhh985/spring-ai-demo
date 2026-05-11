@@ -1,14 +1,14 @@
 package com.example.aidemo;
 
 import com.example.aidemo.service.DatabaseService;
+import com.example.aidemo.service.DatabaseTools;
 import com.example.aidemo.service.VectorStoreService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -18,52 +18,24 @@ public class ChatController {
     private final ChatClient chatClient;
     private final DatabaseService databaseService;
     private final VectorStoreService vectorStoreService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String SYSTEM_PROMPT = """
             You are an e-commerce data analyst.
             
-            You can use these tools:
-            - getProductsByPriceAsc(): Get products sorted by price (ascending). Use for "cheapest", "lowest price" questions.
-            - getProductsBySales(): Get products sorted by sales (descending). Use for "best selling", "most popular" questions.
-            - getSalesSummary(): Get sales statistics.
-
-            When user asks questions requiring precise data, you should proactively call these tools.
+            You can use these tools when user asks for data:
+            - getProductsByPriceAsc: Get products sorted by price (ascending)
+            - getProductsBySales: Get products sorted by sales (descending)  
+            - getSalesSummary: Get sales statistics
             """;
 
     public ChatController(ChatClient.Builder chatClientBuilder, 
                           DatabaseService databaseService,
-                          VectorStoreService vectorStoreService) {
-        // Register tools using defaultFunction
+                          VectorStoreService vectorStoreService,
+                          DatabaseTools databaseTools) {
+        // 使用 defaultFunctions 注册工具
+        List<FunctionCallback> tools = databaseTools.getTools();
         this.chatClient = chatClientBuilder
-                .defaultFunction("getProductsByPriceAsc", 
-                    "Get products sorted by price (ascending)",
-                    (Supplier<String>) () -> {
-                        var products = databaseService.getProductsByPriceDesc();
-                        Collections.reverse(products);
-                        try { return objectMapper.writeValueAsString(products); } 
-                        catch (Exception e) { return "Error: " + e.getMessage(); }
-                    })
-                .defaultFunction("getProductsBySales",
-                    "Get products sorted by sales (descending)",
-                    (Supplier<String>) () -> {
-                        var products = databaseService.getProductsBySales();
-                        try { 
-                            return objectMapper.writeValueAsString(products); 
-                        } catch (Exception e) { 
-                            return "Error: " + e.getMessage(); 
-                        }
-                    })
-                .defaultFunction("getSalesSummary", 
-                    "Get sales statistics",
-                    (Supplier<String>) () -> {
-                        var summary = databaseService.getSalesSummary();
-                        try { 
-                            return objectMapper.writeValueAsString(summary); 
-                        } catch (Exception e) { 
-                            return "Error: " + e.getMessage(); 
-                        }
-                    })
+                .defaultFunctions(tools.toArray(new FunctionCallback[0]))
                 .build();
 
         this.databaseService = databaseService;
@@ -72,7 +44,6 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String chat(@RequestParam String message) {
-        // Direct call - AI will automatically decide to use tools or not
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
                 .user(message)

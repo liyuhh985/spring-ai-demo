@@ -25,8 +25,8 @@ public class DatabaseTools {
      */
     public List<FunctionCallback> getTools() {
         return List.of(
-            // Tool 1: 按价格升序查询
-            FunctionCallbackWrapper.<String, String>builder(input -> {
+            // Tool 1: 按价格升序查询（无需参数）
+            FunctionCallbackWrapper.<String, String>builder(ignored -> {
                 var products = databaseService.getProductsByPriceDesc();
                 java.util.Collections.reverse(products);
                 return toJson(products);
@@ -36,8 +36,8 @@ public class DatabaseTools {
                 .withInputType(String.class)
                 .build(),
 
-            // Tool 2: 按销量排序查询
-            FunctionCallbackWrapper.<String, String>builder(input -> {
+            // Tool 2: 按销量排序查询（无需参数）
+            FunctionCallbackWrapper.<String, String>builder(ignored -> {
                 var products = databaseService.getProductsBySales();
                 return toJson(products);
             })
@@ -46,7 +46,7 @@ public class DatabaseTools {
                 .withInputType(String.class)
                 .build(),
 
-            // Tool 3: 按类别查询
+            // Tool 3: 按类别查询（需要类别参数）
             FunctionCallbackWrapper.<String, String>builder(input -> {
                 var products = databaseService.getProductsByCategory(input);
                 return toJson(products);
@@ -56,8 +56,8 @@ public class DatabaseTools {
                 .withInputType(String.class)
                 .build(),
 
-            // Tool 4: 获取销售统计
-            FunctionCallbackWrapper.<String, String>builder(input -> {
+            // Tool 4: 获取销售统计（无需参数）
+            FunctionCallbackWrapper.<String, String>builder(ignored -> {
                 var summary = databaseService.getSalesSummary();
                 return toJson(summary);
             })
