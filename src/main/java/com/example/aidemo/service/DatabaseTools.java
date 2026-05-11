@@ -1,9 +1,13 @@
 package com.example.aidemo.service;
 
+import com.alibaba.excel.EasyExcel;
+import com.example.aidemo.entity.Product;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -63,9 +67,33 @@ public class DatabaseTools {
                 .withName("getSalesSummary")
                 .withDescription("获取销售统计数据，包括总销售额、总订单数、平均订单金额等")
                 .withInputType(Void.class)
+                .build(),
+
+            // Tool 5: 导出产品到 Excel
+            FunctionCallbackWrapper.<ExportExcelRequest, Map<String, Object>>builder(request -> {
+                try {
+                    var products = databaseService.getAllProducts();
+                    // 导出到指定路径
+                    String fileName = request.fileName() != null ? request.fileName() : "products.xlsx";
+                    String filePath = request.path() != null ? request.path() + "/" + fileName : fileName;
+                    
+                    EasyExcel.write(filePath, Product.class)
+                        .sheet("产品列表")
+                        .doWrite(products);
+                    
+                    return Map.of("status", "success", "message", "Excel导出成功", "filePath", filePath);
+                } catch (Exception e) {
+                    return Map.of("status", "error", "message", "Excel导出失败: " + e.getMessage());
+                }
+            })
+                .withName("exportProductsToExcel")
+                .withDescription("导出所有产品到 Excel 文件")
+                .withInputType(ExportExcelRequest.class)
                 .build()
         );
     }
 
     public record CategoryRequest(String category) {}
+
+    public record ExportExcelRequest(String path, String fileName) {}
 }

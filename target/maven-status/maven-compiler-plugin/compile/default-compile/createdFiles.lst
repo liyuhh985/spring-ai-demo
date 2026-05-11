@@ -1,8 +1,10 @@
 com/example/aidemo/utils/Test.class
 com/example/aidemo/FunctionInput.class
 com/example/aidemo/service/QianfanService.class
+com/example/aidemo/service/DatabaseTools$CategoryRequest.class
 com/example/aidemo/utils/TextChunkUtil.class
 com/example/aidemo/utils/EmbeddingUtil.class
+com/example/aidemo/service/DatabaseTools$ExportExcelRequest.class
 com/example/aidemo/mapper/ProductMapper.class
 com/example/aidemo/service/DatabaseTools.class
 com/example/aidemo/service/DatabaseService.class
