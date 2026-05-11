@@ -7,7 +7,7 @@ spring:
       base-url: https://api.deepseek.com
       chat:
         options:
-          model: deepseek-v4-flash
+          model: deepseek-chat
       api-key: ${DEEPSEEK_API_KEY}
   
   # Redis 配置（使用 DB1，不影响其他项目）
