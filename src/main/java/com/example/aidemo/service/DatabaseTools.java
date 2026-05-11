@@ -72,7 +72,7 @@ public class DatabaseTools {
                 try {
                     var products = databaseService.getAllProducts();
                     // 固定导出路径
-                    String filePath = "/tmp/products.xlsx";
+                    String filePath = "C:/temp/products.xlsx";
                     
                     EasyExcel.write(filePath, Product.class)
                         .sheet("产品列表")
@@ -84,7 +84,7 @@ public class DatabaseTools {
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件，文件将保存在 /tmp/products.xlsx")
+                .withDescription("导出所有产品到 Excel 文件，文件将保存在 C:/temp/products.xlsx")
                 .withInputType(Void.class)
                 .build()
         );
