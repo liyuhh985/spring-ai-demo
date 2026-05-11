@@ -1,8 +1,11 @@
 package com.example.aidemo;
 
+import com.alibaba.excel.EasyExcel;
+import com.example.aidemo.entity.Product;
 import com.example.aidemo.service.DatabaseService;
 import com.example.aidemo.service.DatabaseTools;
 import com.example.aidemo.service.VectorStoreService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.scheduling.annotation.Async;
@@ -86,6 +89,18 @@ public class ChatController {
             return response.toString();
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/export")
+    public void exportExcel(HttpServletResponse response) {
+        try {
+            List<Product> products = databaseService.getAllProducts();
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=products.xlsx");
+            EasyExcel.write(response.getOutputStream(), Product.class).sheet("产品列表").doWrite(products);
+        } catch (Exception e) {
+            System.out.println("Export failed: " + e.getMessage());
         }
     }
 }

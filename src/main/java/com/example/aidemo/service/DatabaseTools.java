@@ -89,7 +89,7 @@ public class DatabaseTools {
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件，返回 Base64 编码的文件内容")
+                .withDescription("导出所有产品到 Excel 文件（无参数）。返回 Base64 编码的 Excel 文件，AI 需要将 data 字段的内容保存为 filename 指定的 .xlsx 文件提供给用户下载。")
                 .withInputType(Void.class)
                 .build()
         );
