@@ -6,7 +6,6 @@ import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -68,27 +67,29 @@ public class DatabaseTools {
                 .withInputType(Void.class)
                 .build(),
 
-            // Tool 5: 导出产品到 Excel（无参数，使用固定路径）
+            // Tool 5: 导出产品到 Excel（返回 Base64）
             FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 try {
                     var products = databaseService.getAllProducts();
-                    // 固定导出路径
-                    String filePath = "C:/temp/products.xlsx";
                     
-                    // 自动创建目录
-                    new File("C:/temp").mkdirs();
+                    // 在内存中生成 Excel
+                    java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
                     
-                    EasyExcel.write(filePath, Product.class)
+                    EasyExcel.write(outputStream, Product.class)
                         .sheet("产品列表")
                         .doWrite(products);
                     
-                    return Map.of("status", "success", "message", "Excel导出成功", "filePath", filePath);
+                    // 转换为 Base64
+                    byte[] excelBytes = outputStream.toByteArray();
+                    String base64 = java.util.Base64.getEncoder().encodeToString(excelBytes);
+                    
+                    return Map.of("status", "success", "data", base64, "filename", "products.xlsx");
                 } catch (Exception e) {
                     return Map.of("status", "error", "message", "Excel导出失败: " + e.getMessage());
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件，文件将保存在 C:/temp/products.xlsx")
+                .withDescription("导出所有产品到 Excel 文件，返回 Base64 编码的文件内容")
                 .withInputType(Void.class)
                 .build()
         );
