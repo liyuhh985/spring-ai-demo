@@ -11,6 +11,8 @@ import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,9 +98,33 @@ public class ChatController {
     public void exportExcel(HttpServletResponse response) {
         try {
             List<Product> products = databaseService.getAllProducts();
+            
+            // 添加日志确认查询成功
+            System.out.println("Export: Found " + products.size() + " products");
+            
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-Disposition", "attachment; filename=products.xlsx");
-            EasyExcel.write(response.getOutputStream(), Product.class).sheet("产品列表").doWrite(products);
+            
+            // 手动定义表头
+            List<List<String>> head = new ArrayList<>();
+            head.add(Arrays.asList("ID"));
+            head.add(Arrays.asList("产品名称"));
+            head.add(Arrays.asList("类别"));
+            head.add(Arrays.asList("价格"));
+            head.add(Arrays.asList("库存"));
+            head.add(Arrays.asList("销量"));
+            
+            // 写入数据
+            List<List<Object>> data = new ArrayList<>();
+            for (Product p : products) {
+                List<Object> row = Arrays.asList(p.getId(), p.getName(), p.getCategory(), p.getPrice(), p.getStock(), p.getSales());
+                data.add(row);
+            }
+            
+            EasyExcel.write(response.getOutputStream())
+                .head(head)
+                .sheet("产品列表")
+                .doWrite(data);
         } catch (Exception e) {
             System.out.println("Export failed: " + e.getMessage());
         }
