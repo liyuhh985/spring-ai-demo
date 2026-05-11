@@ -2,16 +2,10 @@ package com.example.aidemo.service;
 
 import com.alibaba.excel.EasyExcel;
 import com.example.aidemo.entity.Product;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -73,13 +67,12 @@ public class DatabaseTools {
                 .withInputType(Void.class)
                 .build(),
 
-            // Tool 5: 导出产品到 Excel
-            FunctionCallbackWrapper.<ExportExcelRequest, Map<String, Object>>builder(request -> {
+            // Tool 5: 导出产品到 Excel（无参数，使用固定路径）
+            FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 try {
                     var products = databaseService.getAllProducts();
-                    // 导出到指定路径
-                    String fileName = request.fileName() != null ? request.fileName() : "products.xlsx";
-                    String filePath = request.path() != null ? request.path() + "/" + fileName : fileName;
+                    // 固定导出路径
+                    String filePath = "/tmp/products.xlsx";
                     
                     EasyExcel.write(filePath, Product.class)
                         .sheet("产品列表")
@@ -91,13 +84,11 @@ public class DatabaseTools {
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件")
-                .withInputType(ExportExcelRequest.class)
+                .withDescription("导出所有产品到 Excel 文件，文件将保存在 /tmp/products.xlsx")
+                .withInputType(Void.class)
                 .build()
         );
     }
 
     public record CategoryRequest(String category) {}
-
-    public record ExportExcelRequest(@JsonProperty("path") String path, @JsonProperty("fileName") String fileName) {}
 }
