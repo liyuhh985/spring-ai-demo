@@ -6,6 +6,7 @@ import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +74,9 @@ public class DatabaseTools {
                     var products = databaseService.getAllProducts();
                     // 固定导出路径
                     String filePath = "C:/temp/products.xlsx";
+                    
+                    // 自动创建目录
+                    new File("C:/temp").mkdirs();
                     
                     EasyExcel.write(filePath, Product.class)
                         .sheet("产品列表")
