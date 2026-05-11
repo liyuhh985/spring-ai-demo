@@ -67,7 +67,7 @@ public class DatabaseTools {
                 .withInputType(Void.class)
                 .build(),
 
-            // Tool 5: 导出产品到 Excel（返回 Base64）
+            // Tool 5: 导出产品到 Excel（返回 data URL）
             FunctionCallbackWrapper.<Void, Map<String, Object>>builder(ignored -> {
                 try {
                     var products = databaseService.getAllProducts();
@@ -83,13 +83,16 @@ public class DatabaseTools {
                     byte[] excelBytes = outputStream.toByteArray();
                     String base64 = java.util.Base64.getEncoder().encodeToString(excelBytes);
                     
-                    return Map.of("status", "success", "data", base64, "filename", "products.xlsx");
+                    // 返回 data URL 格式，用户可直接在浏览器打开下载
+                    String downloadUrl = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64;
+                    
+                    return Map.of("status", "success", "downloadUrl", downloadUrl, "filename", "products.xlsx");
                 } catch (Exception e) {
                     return Map.of("status", "error", "message", "Excel导出失败: " + e.getMessage());
                 }
             })
                 .withName("exportProductsToExcel")
-                .withDescription("导出所有产品到 Excel 文件（无参数）。返回 Base64 编码的 Excel 文件，AI 需要将 data 字段的内容保存为 filename 指定的 .xlsx 文件提供给用户下载。")
+                .withDescription("导出所有产品到 Excel 文件（无参数）。返回 data URL 格式的 Excel 下载链接，AI 可以直接将 downloadUrl 提供给用户，用户在浏览器中打开该链接即可自动下载 Excel 文件。")
                 .withInputType(Void.class)
                 .build()
         );
